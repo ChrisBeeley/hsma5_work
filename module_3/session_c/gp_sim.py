@@ -40,6 +40,7 @@ def activity_generator_gp(env, mean_register, mean_consult, mean_book_test,
     global list_of_queuing_times_registration
     global list_of_queueing_times_gp
     global list_of_test_booking_times
+    global list_of_patient_total_time
     
     # Request a receptionist
     with receptionist.request() as req:
@@ -120,6 +121,10 @@ def activity_generator_gp(env, mean_register, mean_consult, mean_book_test,
             # Freeze until that time has elapsed
             yield env.timeout(sampled_booking_time)
 
+    time_in_system = env.now - time_entered_queue_for_registration
+
+    list_of_patient_total_time.append(time_in_system)
+
 # Set up simulation environment
 env = simpy.Environment()
 
@@ -136,6 +141,7 @@ mean_book_test = 4
 list_of_queuing_times_registration = []
 list_of_queueing_times_gp = []
 list_of_test_booking_times = []
+list_of_patient_total_time = []
 
 # Start the arrivals generator
 env.process(patient_generator_gp(env, gp_inter, mean_register,
@@ -163,3 +169,8 @@ names = ["Registration", "Consult", "Book test"]
 ax.bar(names, counts)
 
 plt.show()
+
+list_of_patient_total_time
+
+mean_time_in_system = mean(list_of_patient_total_time)
+print (f"Mean time in system (mins) : {mean_time_in_system:.2f}")
